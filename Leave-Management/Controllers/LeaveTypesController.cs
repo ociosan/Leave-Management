@@ -119,23 +119,40 @@ namespace Leave_Management.Controllers
         // GET: LeaveTypes/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var leaveType = _leaveTypeRepo.FindById(id);
+            if (leaveType == null)
+                return NotFound();
+
+            if (!_leaveTypeRepo.Delete(leaveType))
+                return BadRequest();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // POST: LeaveTypes/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, LeaveTypeViewModel model)
         {
             try
             {
                 // TODO: Add delete logic here
 
+                var leaveType = _leaveTypeRepo.FindById(id);
+                if (leaveType == null)
+                    return NotFound();
+
+                if (!_leaveTypeRepo.Delete(leaveType))
+                {
+                    return View(model);
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
-                return View();
+                ModelState.AddModelError("", "Something went wrong...");
+                return View(model);
             }
         }
     }
