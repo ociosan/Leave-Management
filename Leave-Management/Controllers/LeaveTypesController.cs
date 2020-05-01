@@ -136,7 +136,6 @@ namespace Leave_Management.Controllers
         {
             try
             {
-                // TODO: Add delete logic here
 
                 var leaveType = _leaveTypeRepo.FindById(id);
                 if (leaveType == null)
