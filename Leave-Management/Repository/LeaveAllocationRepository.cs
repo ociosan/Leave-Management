@@ -63,6 +63,14 @@ namespace Leave_Management.Repository
                 .ToList();
         }
 
+        public LeaveAllocation GetLeaveAllocationsByEmployeeAndType(string id, int leavetypeid)
+        {
+            var period = DateTime.Now.Year;
+
+            return FindAll()
+                .FirstOrDefault(x => x.EmployeeId == id && x.Period == period && x.LeaveTypeId == leavetypeid);
+        }
+
         public bool IsExists(int id)
         {
             return _db.LeaveTypes.Any(q => q.Id == id);

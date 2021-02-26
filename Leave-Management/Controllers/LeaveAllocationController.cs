@@ -65,7 +65,7 @@ namespace Leave_Management.Controllers
                 var leaveAllocation = _mapper.Map<LeaveAllocation>(allocation);
                 _leaveAllocationRepo.Create(leaveAllocation);
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index),"Home");
         }
 
         public ActionResult ListEmployees()

@@ -16,11 +16,9 @@ namespace Leave_Management.Data
 
         public DbSet<Employee> Employees { get; set; }
         public DbSet<LeaveAllocation> LeaveAllocations { get; set; }
-        public DbSet<LeaveHistory> LeaveHistories { get; set; }
+        public DbSet<LeaveRequest> LeaveRequests { get; set; }
         public DbSet<LeaveType> LeaveTypes { get; set; }
-        public DbSet<Leave_Management.Models.LeaveTypeViewModel> DetailsLeaveTypeViewModel { get; set; }
-        public DbSet<Leave_Management.Models.EmployeeViewModel> EmployeeViewModel { get; set; }
-        public DbSet<Leave_Management.Models.LeaveAllocationViewModel> LeaveAllocationViewModel { get; set; }
-        public DbSet<Leave_Management.Models.EditLeaveAllocationViewModel> EditLeaveAllocationViewModel { get; set; }
+        public DbSet<Leave_Management.Models.LeaveRequestViewModel> LeaveRequestViewModel { get; set; }
+
     }
 }

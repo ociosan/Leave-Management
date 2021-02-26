@@ -12,10 +12,10 @@ namespace Leave_Management.Controllers
     public class LeaveHistoryController : Controller
     {
         //Dependency Injection
-        private readonly ILeaveHistoryRepository _leaveHistoryRepo;
+        private readonly ILeaveRequestRepository _leaveHistoryRepo;
         private readonly IMapper _mapper;
 
-        public LeaveHistoryController(ILeaveHistoryRepository therepo, IMapper themapper)
+        public LeaveHistoryController(ILeaveRequestRepository therepo, IMapper themapper)
         {
             _leaveHistoryRepo = therepo;
             _mapper = themapper;
