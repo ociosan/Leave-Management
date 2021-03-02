@@ -18,26 +18,22 @@ namespace Leave_Management.Controllers
     [Authorize]
     public class LeaveRequestController : Controller
     {
-        private readonly ILeaveRequestRepository _leaveRequestRepo;
-        private readonly ILeaveTypeRepository _leaveTypeRepo;
-        private readonly ILeaveAllocationRepository _leaveAllocationRepo;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<Employee> _userManager;
 
-        public LeaveRequestController(ILeaveRequestRepository leaveRequestRepo, IMapper mapper, UserManager<Employee> userManager, ILeaveTypeRepository leaveTypeRepo, ILeaveAllocationRepository leaveAllocationRepo)
+        public LeaveRequestController(IMapper mapper, UserManager<Employee> userManager, IUnitOfWork unitOfWork)
         {
-            _leaveRequestRepo = leaveRequestRepo;
             _mapper = mapper;
             _userManager = userManager;
-            _leaveTypeRepo = leaveTypeRepo;
-            _leaveAllocationRepo = leaveAllocationRepo;
+            _unitOfWork = unitOfWork;
         }
 
         [Authorize(Roles = "Administrator")]
         // GET: LeaveRequest
         public async Task<ActionResult> Index()
         {
-            var leaverequests = await _leaveRequestRepo.FindAll();
+            var leaverequests = await _unitOfWork.LeaveRequests.FindAll();
 
             var leaveRequestsModel = _mapper.Map<List<LeaveRequestViewModel>>(leaverequests);
             var model = new AdminLeaveRequestViewModel
@@ -55,7 +51,7 @@ namespace Leave_Management.Controllers
         // GET: LeaveRequest/Details/5
         public async Task<ActionResult> Details(int id)
         {
-            var leaveRequest = await _leaveAllocationRepo.FindById(id);
+            var leaveRequest = await _unitOfWork.LeaveRequests.Find(q => q.Id == id);
             var model = _mapper.Map<LeaveRequestViewModel>(leaveRequest);
             return View(model);
         }
@@ -63,7 +59,7 @@ namespace Leave_Management.Controllers
         // GET: LeaveRequest/Create
         public async Task<ActionResult> Create()
         {
-            var leaveTypes = await _leaveTypeRepo.FindAll();
+            var leaveTypes = await _unitOfWork.LeaveTypes.FindAll();
             var leaveTypeItems = leaveTypes.Select(q => new SelectListItem 
             {
                 Text = q.Name
@@ -86,7 +82,7 @@ namespace Leave_Management.Controllers
             {
                 var startDate = Convert.ToDateTime(model.StartDate);
                 var endDate = Convert.ToDateTime(model.EndDate);
-                var leaveTypes = await _leaveTypeRepo.FindAll();
+                var leaveTypes = await _unitOfWork.LeaveTypes.FindAll();
                 var leaveTypeItems = leaveTypes.Select(q => new SelectListItem
                 {
                     Text = q.Name
@@ -104,7 +100,7 @@ namespace Leave_Management.Controllers
                 }
 
                 var employee = _userManager.GetUserAsync(User).Result;
-                var allocations = await _leaveAllocationRepo.GetLeaveAllocationsByEmployeeAndType(employee.Id, model.LeaveTypeId);
+                var allocations = await _unitOfWork.LeaveAllocations.Find(x => x.EmployeeId == employee.Id && x.Period == DateTime.Now.Year && x.LeaveTypeId == model.LeaveTypeId);
                 int daysRequested = (int)(startDate - endDate).TotalDays;
 
                 if (daysRequested > allocations.NumberOfDays)
@@ -125,13 +121,10 @@ namespace Leave_Management.Controllers
                 };
 
                 var leaveRequest = _mapper.Map<LeaveRequest>(leaveRequestModel);
-                bool isSuccess = await _leaveRequestRepo.Create(leaveRequest);
-                
-                if(!isSuccess)
-                {
-                    ModelState.AddModelError("", "Something went wrong");
-                    return View();
-                }
+
+                await _unitOfWork.LeaveRequests.Create(leaveRequest);
+                await _unitOfWork.Save();
+
 
                 return RedirectToAction(nameof(Index),"Home");
             }
@@ -187,5 +180,12 @@ namespace Leave_Management.Controllers
                 return View();
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            _unitOfWork.Dispose();
+            base.Dispose(disposing);
+        }
+
     }
 }
